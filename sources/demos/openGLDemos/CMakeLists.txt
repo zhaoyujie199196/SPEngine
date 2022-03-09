@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.8)
+PROJECT(OPENGLDEMOS)
+#添加c++17
+add_compile_options("/std:c++latest")
+
+#添加三方库路径
+set(THIRDPARTY_DIR ./../../../3rdparty)
+INCLUDE_DIRECTORIES(${THIRDPARTY_DIR}/glfw/include)
+INCLUDE_DIRECTORIES(${THIRDPARTY_DIR}/glad/include)
+LINK_DIRECTORIES(${THIRDPARTY_DIR}/glfw/libs/win64_debug)
+
+#指定执行文件
+ADD_EXECUTABLE(OPENGLDEMOS ./main.cpp)
+#指定第三方库
+TARGET_LINK_LIBRARIES(OPENGLDEMOS PUBLIC glfw3)
+#添加glad源代码
+FILE(GLOB GLAD_SOURCE_C "${THIRDPARTY_DIR}/glad/src/*.c")
+TARGET_SOURCES(OPENGLDEMOS PUBLIC ${GLAD_SOURCE_C})
+
+#添加主工程include
+INCLUDE_DIRECTORIES(./)
+
+#主工程代码
+FILE(GLOB_RECURSE SRC_LIST_CPP "./*.cpp")
+FILE(GLOB_RECURSE SRC_LIST_H "./*.h")
+TARGET_SOURCES(OPENGLDEMOS PUBLIC ${SRC_LIST_CPP})
+MESSAGE("source files ${SRC_LIST_CPP}")
+MESSAGE("header files ${SRC_LIST_H}")
