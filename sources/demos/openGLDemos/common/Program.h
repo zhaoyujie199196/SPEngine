@@ -12,8 +12,10 @@ namespace OpenGLDemos
 			static Program* create(const std::string &vs, std::string &gs, std::string &fs);
 			static Program *create(const std::string &vs, const std::string &fs);
 			~Program();
-			void apply();
+			void use();
 			void reset();
+			unsigned int programID() const;
+			void setUniformInt(const std::string &uniformName, int value);
 
 		protected:
 			Program();

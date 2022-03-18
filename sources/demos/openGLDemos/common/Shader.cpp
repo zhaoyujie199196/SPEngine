@@ -43,7 +43,7 @@ bool Shader::setSource(const std::string &source)
 	{
 		char logInfo[512] = {};
 		glGetShaderInfoLog(m_shader, 512, NULL, logInfo);
-		sprintf("compile shader failed : %s", logInfo);
+		OD_PRINT_INFO("compile shader failed : %s", logInfo);
 		return false;
 	}
 	return true;

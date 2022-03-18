@@ -1,28 +1,52 @@
-cmake_minimum_required(VERSION 3.8)
+Ôªøcmake_minimum_required(VERSION 3.8)
 PROJECT(OPENGLDEMOS)
-#ÃÌº”c++17
+#Ê∑ªÂä†c++17
 add_compile_options("/std:c++latest")
 
-#ÃÌº”»˝∑Ωø‚¬∑æ∂
-set(THIRDPARTY_DIR ./../../../3rdparty)
+#Ê∑ªÂä†‰∏âÊñπÂ∫ìË∑ØÂæÑ
+set(THIRDPARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty)
+INCLUDE_DIRECTORIES(${THIRDPARTY_DIR})
 INCLUDE_DIRECTORIES(${THIRDPARTY_DIR}/glfw/include)
 INCLUDE_DIRECTORIES(${THIRDPARTY_DIR}/glad/include)
 LINK_DIRECTORIES(${THIRDPARTY_DIR}/glfw/libs/win64_debug)
 
-#÷∏∂®÷¥––Œƒº˛
+#ÊåáÂÆöÊâßË°åÊñá‰ª∂
 ADD_EXECUTABLE(OPENGLDEMOS ./main.cpp)
-#÷∏∂®µ⁄»˝∑Ωø‚
+#ÊåáÂÆöÁ¨¨‰∏âÊñπÂ∫ì
+#Ê∑ªÂä†glfw
 TARGET_LINK_LIBRARIES(OPENGLDEMOS PUBLIC glfw3)
-#ÃÌº”glad‘¥¥˙¬Î
+#Ê∑ªÂä†gladÊ∫ê‰ª£Á†Å
 FILE(GLOB GLAD_SOURCE_C "${THIRDPARTY_DIR}/glad/src/*.c")
 TARGET_SOURCES(OPENGLDEMOS PUBLIC ${GLAD_SOURCE_C})
+TARGET_SOURCES(OPENGLDEMOS PUBLIC ${GLAD_SOURCE_C})
+#Ê∑ªÂä†stb_image
+FILE(GLOB STBIMAGE_H "${THIRDPARTY_DIR}/stbImage/*.h")
+FILE(GLOB STBIMAGE_CPP "${THIRDPARTY_DIR}/stbImage/*.cpp")
+TARGET_SOURCES(OPENGLDEMOS PUBLIC ${STBIMAGE_H})
+TARGET_SOURCES(OPENGLDEMOS PUBLIC ${STBIMAGE_CPP})
 
-#ÃÌº”÷˜π§≥Ãinclude
-INCLUDE_DIRECTORIES(./)
+#Ê∑ªÂä†‰∏ªÂ∑•Á®ãinclude
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/)
 
-#÷˜π§≥Ã¥˙¬Î
+#‰∏ªÂ∑•Á®ã‰ª£Á†Å
 FILE(GLOB_RECURSE SRC_LIST_CPP "./*.cpp")
 FILE(GLOB_RECURSE SRC_LIST_H "./*.h")
 TARGET_SOURCES(OPENGLDEMOS PUBLIC ${SRC_LIST_CPP})
+
+set(BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../OpenGLDemosBuild)
+set(EXECUTABLE_OUTPUT_PATH ${BUILD_DIR}/bin)
+set(PROJECT_BINARY_DIR ${BUILD_DIR}/build/x64-debug)
+
+#Ê∑ªÂä†ÁºñËØëÂ§ÑÁêÜÔºåÈìæÊé•builtinResÊñá‰ª∂
+MESSAGE("bash path=$ENV{BASH}")
+SET( BASH_COMMAND_TO_RUN $ENV{BASH} "-c" "cd ${CMAKE_CURRENT_SOURCE_DIR} && sh ./linkBuiltinRes.sh ${EXECUTABLE_OUTPUT_PATH}/builtinRes ${CMAKE_CURRENT_SOURCE_DIR}/builtinRes" )
+EXECUTE_PROCESS( COMMAND ${BASH_COMMAND_TO_RUN} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} RESULT_VARIABLE command_result )
+IF( NOT "${command_result}" STREQUAL "0" )
+    MESSAGE( FATAL_ERROR "Error: command_result='${command_result}'" )
+ENDIF()
+
+
 MESSAGE("source files ${SRC_LIST_CPP}")
 MESSAGE("header files ${SRC_LIST_H}")
+MESSAGE("executable output path ${PROJECT_BINARY_DIR}")
+MESSAGE("Current path : ${CMAKE_CURRENT_SOURCE_DIR}")

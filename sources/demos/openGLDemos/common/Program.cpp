@@ -26,7 +26,7 @@ Program *Program::create(const std::string &vs, const std::string &fs)
 		return nullptr;
 	}
 	OD_NAMED_SCOPEGUARD(fsGuard, [fsShader]() {delete fsShader; })
-		auto program = new Program;
+	auto program = new Program;
 	glAttachShader(program->m_program, vsShader->getShaderId());
 	glAttachShader(program->m_program, fsShader->getShaderId());
 	glLinkProgram(program->m_program);
@@ -54,7 +54,7 @@ Program::~Program()
 	glDeleteProgram(m_program);
 }
 
-void Program::apply()
+void Program::use()
 {
 	glUseProgram(m_program);
 }
@@ -62,4 +62,14 @@ void Program::apply()
 void Program::reset()
 {
 	glUseProgram(0);
+}
+
+unsigned int Program::programID() const
+{
+	return m_program;
+}
+
+void Program::setUniformInt(const std::string &uniformName, int value)
+{
+	glUniform1i(glGetUniformLocation(m_program, uniformName.c_str()), value);
 }

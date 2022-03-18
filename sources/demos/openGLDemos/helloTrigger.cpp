@@ -1,4 +1,4 @@
-#include "helloTrigger.h"
+ï»¿#include "helloTrigger.h"
 #include "OpenGLInclude.h"
 #include "common/Program.h"
 #include "Defines.h"
@@ -9,18 +9,22 @@ using namespace OpenGLDemos;
 const std::string c_glsl_vs = R"(
 #version 330 core
 layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+out vec3 pointColor;
 void main()
 {
+    pointColor = aColor;
     gl_Position = vec4(aPos, 1.0f);
 }
 )";
 
 const std::string c_glsl_fs = R"(
 #version 330 core
+in vec3 pointColor;
 out vec4 FragColor;
 void main()
 {
-    FragColor = vec4(0.0f, 1.0f, 0.5f, 1.0f);
+    FragColor = vec4(pointColor, 1.0f);
 }
 )";
 
@@ -42,34 +46,34 @@ void HelloTrigger::execute()
 
 bool HelloTrigger::init()
 {
-	//³õÊ¼»¯glfw
+	//åˆå§‹åŒ–glfw
 	glfwInit();
-	//ÉèÖÃopenGLµÄ°æ±¾Îª3.3
+	//è®¾ç½®openGLçš„ç‰ˆæœ¬ä¸º3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//ÉèÖÃopenGLºËĞÄÄ£Ê½
+	//è®¾ç½®openGLæ ¸å¿ƒæ¨¡å¼
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//´´½¨´°¿Ú
+	//åˆ›å»ºçª—å£
 	m_window = glfwCreateWindow(800, 600, "LearnOpenGL", nullptr, nullptr);
-	//ÉèÖÃ´°¿Ú´óĞ¡¸Ä±äµÄ»Øµ÷º¯Êı£¬ÓÃÒÔ¸Ä±äviewport
+	//è®¾ç½®çª—å£å¤§å°æ”¹å˜çš„å›è°ƒå‡½æ•°ï¼Œç”¨ä»¥æ”¹å˜viewport
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow *window, int width, int height) {
 		std::cout << "glfwSetFreameBufferSizeCallBack : " << width << "  " << height;
 		std::flush(std::cout);
 		glViewport(0, 0, width, height);
 	});
-	//ÉèÖÃopenGLÉÏÏÂÎÄ
+	//è®¾ç½®openGLä¸Šä¸‹æ–‡
 	glfwMakeContextCurrent(m_window);
-	//³õÊ¼»¯glad£¬ÔÚµ÷ÓÃopenGLµÄÏà¹Øº¯ÊıÖ®Ç°µ÷ÓÃ£¬·ñÔò»áÊ¹ÓÃopenGLÏà¹Øº¯ÊıÊ±£¬»á±¨¿ÕÖ¸ÕëÒì³£
+	//åˆå§‹åŒ–gladï¼Œåœ¨è°ƒç”¨openGLçš„ç›¸å…³å‡½æ•°ä¹‹å‰è°ƒç”¨ï¼Œå¦åˆ™ä¼šä½¿ç”¨openGLç›¸å…³å‡½æ•°æ—¶ï¼Œä¼šæŠ¥ç©ºæŒ‡é’ˆå¼‚å¸¸
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "load glad failed : " << std::endl;
 		return false;
 	}
 	float points[] = {
-		-0.5, -0.5, 0,
-		0.5, -0.5, 0,
-		0.5, 0.5, 0,
-		-0.5, 0.5, 0
+		-0.5, -0.5, 0, 0.1, 0.1, 1.0,
+		0.5, -0.5, 0, 1.0, 0.1, 0.1,
+		0.5, 0.5, 0, 0.5, 0.5, 0.2,
+		-0.5, 0.5, 0, 0.1, 0.5, 0.5
 	};
 
 	unsigned int trangleIndexes[6] = {
@@ -77,7 +81,7 @@ bool HelloTrigger::init()
 		2, 3, 0
 	};
 
-	//±àÒëvsShader
+	//ç¼–è¯‘vsShader
 	m_program = Common::Program::create(c_glsl_vs, c_glsl_fs);
 	if (m_program == nullptr)
 	{
@@ -95,9 +99,10 @@ bool HelloTrigger::init()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(trangleIndexes), trangleIndexes, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-	
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -106,22 +111,22 @@ bool HelloTrigger::init()
 
 void HelloTrigger::run()
 {
-	//Èç¹ûÃ»ÓĞ¹Ø±Õ£¬×öÑ­»·
+	//å¦‚æœæ²¡æœ‰å…³é—­ï¼Œåšå¾ªç¯
 	while (!glfwWindowShouldClose(m_window))
 	{
-		//Ñ­»·¿ªÊ¼ÏÈ´¦ÀíÊÂ¼ş
+		//å¾ªç¯å¼€å§‹å…ˆå¤„ç†äº‹ä»¶
 		processEvent();
 		glfwMakeContextCurrent(m_window);
-		//ÉèÖÃÇå³ıÑÕÉ«
+		//è®¾ç½®æ¸…é™¤é¢œè‰²
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		//Çå³ıÑÕÉ«
+		//æ¸…é™¤é¢œè‰²
 		glClear(GL_COLOR_BUFFER_BIT);
-		m_program->apply();
+		m_program->use();
 		glBindVertexArray(m_vao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		//½»»»»º³åÇø£¬·ñÔò»æÖÆÊ±£¬»áÓĞ´ÓÉÏµ½ÏÂ£¬´Ó×óµ½ÓÒµÄÏßÌõ´òÓ¡
+		//äº¤æ¢ç¼“å†²åŒºï¼Œå¦åˆ™ç»˜åˆ¶æ—¶ï¼Œä¼šæœ‰ä»ä¸Šåˆ°ä¸‹ï¼Œä»å·¦åˆ°å³çš„çº¿æ¡æ‰“å°
 		glfwSwapBuffers(m_window);
-		//´¦ÀíÊó±ê¼üÅÌÊÂ¼ş¡£´Ë´úÂëÈ±Ê§£¬»áµ¼ÖÂÊó±ê¼üÅÌÔÚ´´½¨µÄopenGL´°¿ÚÉÏÎŞÏìÓ¦
+		//å¤„ç†é¼ æ ‡é”®ç›˜äº‹ä»¶ã€‚æ­¤ä»£ç ç¼ºå¤±ï¼Œä¼šå¯¼è‡´é¼ æ ‡é”®ç›˜åœ¨åˆ›å»ºçš„openGLçª—å£ä¸Šæ— å“åº”
 		glfwPollEvents();
 	}
 
