@@ -2,7 +2,7 @@
 
 struct GLFWwindow;
 namespace OpenGLDemos {
-	//ÌùÍ¼demo
+	//è´´å›¾demo
 	namespace Common {
 		class Program;
 		class Texture2D;
@@ -12,16 +12,22 @@ namespace OpenGLDemos {
 	public:
 		static void execute();
 
+	protected:
 		bool init();
+		bool initImGui();
 		void run();
 		void processEvent();
+		void drawTexture();
+		void drawImGui();
 	
 	protected:
 		GLFWwindow *m_window = nullptr;
 		unsigned int m_vao = 0;
 		unsigned int m_vbo = 0;
 		unsigned int m_ebo = 0;
+		float m_wallRatio = 0.5;
 		Common::Program *m_program = nullptr;
-		Common::Texture2D *m_texture = nullptr;
+		Common::Texture2D *m_wallTexture = nullptr;
+		Common::Texture2D * m_smileTexture = nullptr;
 	};
 }

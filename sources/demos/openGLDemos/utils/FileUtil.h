@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <string>
 #include <list>
@@ -8,15 +8,15 @@ namespace OpenGLDemos
 		class FileUtil
 		{
 		public:
-			//applicationÂ·¾¶
+			//applicationè·¯å¾„
 			static const std::string &applicationDir();
-			//builtiResÂ·¾¶
+			//builtiResè·¯å¾„
 			static const std::string &builtinResDir();
-			//Æ´½ÓÂ·¾¶
+			//æ‹¼æ¥è·¯å¾„
 			static std::string combinePath(const std::list<std::string> &pathes, bool addSeperate = false);
-			//¹æ·¶ÎÄ¼ş·Ö¸î·ûºÅ
+			//è§„èŒƒæ–‡ä»¶åˆ†å‰²ç¬¦å·
 			static std::string standardPathSeperate(const std::string &path);
-			//»ñÈ¡ÎÄ¼şµÄdirÂ·¾¶
+			//è·å–æ–‡ä»¶çš„dirè·¯å¾„
 			static std::string dirPath(const std::string &path);
 		};
     }

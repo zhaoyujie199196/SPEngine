@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <glm/glm.hpp>
 
 namespace OpenGLDemos
 {
@@ -16,6 +17,8 @@ namespace OpenGLDemos
 			void reset();
 			unsigned int programID() const;
 			void setUniformInt(const std::string &uniformName, int value);
+			void setUniformFloat(const std::string &uniformName, float value);
+			void setUniformMatrix4F(const std::string &uniformName, const glm::mat4 &matrix);
 
 		protected:
 			Program();

@@ -3,6 +3,7 @@
 #include "utils/ScopeGuard.h"
 #include "Defines.h"
 #include "OpenGLInclude.h"
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace OpenGLDemos::Common;
 
@@ -72,4 +73,14 @@ unsigned int Program::programID() const
 void Program::setUniformInt(const std::string &uniformName, int value)
 {
 	glUniform1i(glGetUniformLocation(m_program, uniformName.c_str()), value);
+}
+
+void Program::setUniformFloat(const std::string &uniformName, float value)
+{
+	glUniform1f(glGetUniformLocation(m_program, uniformName.c_str()), value);
+}
+
+void Program::setUniformMatrix4F(const std::string &uniformName, const glm::mat4 &matrix)
+{
+	glUniformMatrix4fv(glGetUniformLocation(m_program, uniformName.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }

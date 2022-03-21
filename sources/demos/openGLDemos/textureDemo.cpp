@@ -4,6 +4,12 @@
 #include "utils/FileUtil.h"
 #include "core/Application.h"
 #include "common/Texture2D.h"
+#include <imgui/imgui.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace OpenGLDemos;
 
@@ -12,10 +18,12 @@ static const std::string c_glsl_vs = R"(
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec2 aTexCoord;
 out vec2 TexCoord;
+uniform mat4 transMatrix;
 void main()
 {
     TexCoord = aTexCoord;
     gl_Position = vec4(aPos, 1.0f);
+    gl_Position =  transMatrix * gl_Position;
 }
 )";
 static const std::string c_glsl_fs = R"(
@@ -23,13 +31,18 @@ static const std::string c_glsl_fs = R"(
 out vec4 FragColor;
 in vec2 TexCoord;
 uniform sampler2D wallTexture;
+uniform sampler2D smileTexture;
+uniform float wallRatio;
 void main()
 {
-    FragColor = texture(wallTexture, TexCoord);
+    FragColor = wallRatio * texture(wallTexture, TexCoord) + (1 - wallRatio) * texture(smileTexture, TexCoord);
 }
 )";
 
-static const std::string c_pictureName = "wall.jpg";
+static const std::string c_wallImageName = "wall.jpg";
+static const std::string c_smileImageName = "smile.png";
+
+static const char *c_glslVersion = "#version 330";
 
 void textureDemo::execute()
 {
@@ -56,8 +69,13 @@ bool textureDemo::init()
 	{
 		return false;
 	}
-	
-	//Èý½ÇÐÎÎ»ÖÃ ÎÆÀí×ø±êÎ»ÖÃ
+	auto initImGuiSuccess = initImGui();
+	if (!initImGuiSuccess)
+	{
+		return false;
+	}
+
+	//ä¸‰è§’å½¢ä½ç½® çº¹ç†åæ ‡ä½ç½®
 	float points[] = {
 		-0.5, -0.5, 0,  0.0, 0.0,
 		 0.5, -0.5, 0,  1.0, 0.0,
@@ -69,7 +87,7 @@ bool textureDemo::init()
 		0, 1, 2,
 		2, 3, 0
 	};
-	
+
 	m_program = Common::Program::create(c_glsl_vs, c_glsl_fs);
 	if (m_program == nullptr)
 	{
@@ -94,12 +112,40 @@ bool textureDemo::init()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	//¼ÓÔØÍ¼Æ¬
+	//åŠ è½½å›¾ç‰‡
 	auto buildinResDir = Util::FileUtil::builtinResDir();
-	auto imagePath = Util::FileUtil::combinePath({ buildinResDir, c_pictureName });
-	m_texture = new Common::Texture2D(imagePath, GL_RGB);
-	m_texture->activeAndBind(0);
-	m_program->setUniformInt("wallTexture", 0);
+	auto wallImagePath = Util::FileUtil::combinePath({ buildinResDir, c_wallImageName });
+	m_wallTexture = new Common::Texture2D(wallImagePath, GL_RGB);
+	m_wallTexture->bind();
+	auto smileImagePath = Util::FileUtil::combinePath({ buildinResDir, c_smileImageName });
+	m_smileTexture = new Common::Texture2D(smileImagePath, GL_RGBA);
+	m_smileTexture->bind();
+	return true;
+}
+
+bool textureDemo::initImGui()
+{
+	//åˆå§‹åŒ–imgui
+	if (!IMGUI_CHECKVERSION())
+	{
+		return false;
+	}
+	if (ImGui::CreateContext() == nullptr)
+	{
+		return false;
+	}
+
+	ImGuiIO &io = ImGui::GetIO();
+	(void)io;
+	ImGui::StyleColorsDark();
+	if (!ImGui_ImplGlfw_InitForOpenGL(m_window, true))
+	{
+		return false;
+	}
+	if (!ImGui_ImplOpenGL3_Init(c_glslVersion))
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -107,26 +153,56 @@ void textureDemo::run()
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
-		//Ñ­»·¿ªÊ¼ÏÈ´¦ÀíÊÂ¼þ
+		//å¾ªçŽ¯å¼€å§‹å…ˆå¤„ç†äº‹ä»¶
 		processEvent();
 		glfwMakeContextCurrent(m_window);
-		//ÉèÖÃÇå³ýÑÕÉ«
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		//Çå³ýÑÕÉ«
-		glClear(GL_COLOR_BUFFER_BIT);
-		m_program->use();
-		m_texture->activeAndBind(0);
-		glBindVertexArray(m_vao);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		//½»»»»º³åÇø£¬·ñÔò»æÖÆÊ±£¬»áÓÐ´ÓÉÏµ½ÏÂ£¬´Ó×óµ½ÓÒµÄÏßÌõ´òÓ¡
+		drawTexture();
+		drawImGui();
+		//äº¤æ¢ç¼“å†²åŒºï¼Œå¦åˆ™ç»˜åˆ¶æ—¶ï¼Œä¼šæœ‰ä»Žä¸Šåˆ°ä¸‹ï¼Œä»Žå·¦åˆ°å³çš„çº¿æ¡æ‰“å°
 		glfwSwapBuffers(m_window);
-		//´¦ÀíÊó±ê¼üÅÌÊÂ¼þ¡£´Ë´úÂëÈ±Ê§£¬»áµ¼ÖÂÊó±ê¼üÅÌÔÚ´´½¨µÄopenGL´°¿ÚÉÏÎÞÏìÓ¦
+		//å¤„ç†é¼ æ ‡é”®ç›˜äº‹ä»¶ã€‚æ­¤ä»£ç ç¼ºå¤±ï¼Œä¼šå¯¼è‡´é¼ æ ‡é”®ç›˜åœ¨åˆ›å»ºçš„openGLçª—å£ä¸Šæ— å“åº”
 		glfwPollEvents();
 	}
 	glDeleteBuffers(1, &m_vbo);
 	glDeleteVertexArrays(1, &m_vao);
 	delete m_program;
-	delete m_texture;
+	delete m_wallTexture;
+	delete m_smileTexture;
+}
+
+void textureDemo::drawTexture()
+{
+	//è®¾ç½®æ¸…é™¤é¢œè‰²
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	//æ¸…é™¤é¢œè‰²
+	glClear(GL_COLOR_BUFFER_BIT);
+	m_program->use();
+	m_wallTexture->activeAndBind(0);
+	m_smileTexture->activeAndBind(1);
+	m_program->setUniformInt("wallTexture", 0);
+	m_program->setUniformInt("smileTexture", 1);
+	m_program->setUniformFloat("wallRatio", m_wallRatio);
+
+	// è·Ÿéšæ—¶é—´å¯»è½¬
+	glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+	transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+	m_program->setUniformMatrix4F("transMatrix", transform);
+
+	glBindVertexArray(m_vao);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void textureDemo::drawImGui()
+{
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	ImGui::Begin("EditArea");
+	ImGui::SliderFloat("mixRatio", &m_wallRatio, 0, 1);
+	ImGui::End();
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void textureDemo::processEvent()
