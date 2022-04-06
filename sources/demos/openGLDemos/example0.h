@@ -6,12 +6,12 @@ namespace OpenGLDemos {
 	namespace Common{
 		class Program;
 	}
-	class HelloTrigger 
+	class Example0 
 	{
 	public:
 		static void execute();
-		HelloTrigger() = default;
-		~HelloTrigger();
+		Example0() = default;
+		~Example0();
 		bool init();
 		void run();
 

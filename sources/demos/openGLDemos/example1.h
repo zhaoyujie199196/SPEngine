@@ -4,16 +4,23 @@
 
 struct GLFWwindow;
 namespace OpenGLDemos {
-	//贴图demo
+	/*
+	 功能：
+	 1. 2D贴图
+	 2. ImGui与联动
+	 3. 与输入设备交互
+	 4. 模型矩阵、视图矩阵、投影矩阵
+	 */
 	namespace Common {
 		class Program;
 		class Texture2D;
 		class Camera;
 	}
-	class textureDemo
+	class Example1
 	{
 	public:
 		static void execute();
+		~Example1();
 
 	protected:
 		bool init();

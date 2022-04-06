@@ -1,4 +1,4 @@
-﻿#include "helloTrigger.h"
+﻿#include "example0.h"
 #include "OpenGLInclude.h"
 #include "common/Program.h"
 #include "Defines.h"
@@ -28,23 +28,23 @@ void main()
 }
 )";
 
-HelloTrigger::~HelloTrigger()
+Example0::~Example0()
 {
 	delete m_program;
 }
 
-void HelloTrigger::execute()
+void Example0::execute()
 {
-	HelloTrigger *helloTrigger = new HelloTrigger;
-	if (helloTrigger->init())
+	Example0 *example = new Example0;
+	if (example->init())
 	{
-		helloTrigger->run();
+		example->run();
 	}
 	glfwTerminate();
 	return;
 }
 
-bool HelloTrigger::init()
+bool Example0::init()
 {
 	//初始化glfw
 	glfwInit();
@@ -109,7 +109,7 @@ bool HelloTrigger::init()
 	return true;
 }
 
-void HelloTrigger::run()
+void Example0::run()
 {
 	//如果没有关闭，做循环
 	while (!glfwWindowShouldClose(m_window))
@@ -134,7 +134,7 @@ void HelloTrigger::run()
 	glDeleteVertexArrays(1, &m_vao);
 }
 
-void HelloTrigger::processEvent()
+void Example0::processEvent()
 {
 	if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == true)
 	{

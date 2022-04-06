@@ -18,7 +18,8 @@ namespace OpenGLDemos
 			unsigned int programID() const;
 			void setUniformInt(const std::string &uniformName, int value);
 			void setUniformFloat(const std::string &uniformName, float value);
-			void setUniformMatrix4F(const std::string &uniformName, const glm::mat4 &matrix);
+			void setUniformMatrix4f(const std::string &uniformName, const glm::mat4 &matrix);
+			void setUniformVec3f(const std::string &uniformName, const glm::vec3 &vec);
 
 		protected:
 			Program();

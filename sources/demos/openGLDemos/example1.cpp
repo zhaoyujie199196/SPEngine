@@ -1,4 +1,4 @@
-#include "textureDemo.h"
+#include "example1.h"
 #include "OpenGLInclude.h"
 #include "Defines.h"
 #include "common/Program.h"
@@ -52,34 +52,45 @@ static const char *c_glslVersion = "#version 330";
 static const int c_screenWidth = 800;
 static const int c_screenHeight = 600;
 
-static textureDemo *s_textureDemoInstance = nullptr;
+static Example1 *s_example1Instance = nullptr;
 
-void textureDemo::execute()
+Example1::~Example1()
 {
-	textureDemo demo;
-	s_textureDemoInstance = &demo;
-	if (!demo.init())
+	glfwMakeContextCurrent(m_window);
+	glDeleteBuffers(1, &m_vbo);
+	glDeleteVertexArrays(1, &m_vao);
+	delete m_program;
+	delete m_wallTexture;
+	delete m_smileTexture;
+	delete m_window;
+}
+
+void Example1::execute()
+{
+	Example1 example1;
+	s_example1Instance = &example1;
+	if (!example1.init())
 	{
 		return;
 	}
-	demo.run();
+	example1.run();
 }
 
-bool textureDemo::init()
+bool Example1::init()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	m_window = glfwCreateWindow(c_screenWidth, c_screenHeight, "textureDemo", nullptr, nullptr);
+	m_window = glfwCreateWindow(c_screenWidth, c_screenHeight, "example1", nullptr, nullptr);
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow *window, int width, int height) {
 		glViewport(0, 0, width, height);
 	});
 	glfwSetCursorPosCallback(m_window, [](GLFWwindow *window, double xPosIn, double yPosIn) {
-		s_textureDemoInstance->cursorPositionCallBack(xPosIn, yPosIn);
+		s_example1Instance->cursorPositionCallBack(xPosIn, yPosIn);
 	});
 	glfwSetMouseButtonCallback(m_window, [](GLFWwindow *m_window, int button, int action, int modifies) {
-		s_textureDemoInstance->mouseButtonCallBack(button, action, modifies);
+		s_example1Instance->mouseButtonCallBack(button, action, modifies);
 	});
 
 	glfwMakeContextCurrent(m_window);
@@ -179,7 +190,7 @@ bool textureDemo::init()
 	return true;
 }
 
-bool textureDemo::initImGui()
+bool Example1::initImGui()
 {
 	//初始化imgui
 	if (!IMGUI_CHECKVERSION())
@@ -205,7 +216,7 @@ bool textureDemo::initImGui()
 	return true;
 }
 
-void textureDemo::run()
+void Example1::run()
 {
 	m_lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(m_window))
@@ -222,14 +233,9 @@ void textureDemo::run()
 		glfwPollEvents();
 		m_lastTime = m_renderTime;
 	}
-	glDeleteBuffers(1, &m_vbo);
-	glDeleteVertexArrays(1, &m_vao);
-	delete m_program;
-	delete m_wallTexture;
-	delete m_smileTexture;
 }
 
-void textureDemo::drawTexture()
+void Example1::drawTexture()
 {
 	static glm::vec3 s_cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -278,8 +284,8 @@ void textureDemo::drawTexture()
 	// 	transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 	// 	m_program->setUniformMatrix4F("transMatrix", transform);
 
-	m_program->setUniformMatrix4F("viewMatrix", viewMatrix);
-	m_program->setUniformMatrix4F("projectionMatrix", m_projectionMatrix);
+	m_program->setUniformMatrix4f("viewMatrix", viewMatrix);
+	m_program->setUniformMatrix4f("projectionMatrix", m_projectionMatrix);
 
 	glBindVertexArray(m_vao);
 	for (int i = 0; i < 10; ++i)
@@ -291,12 +297,12 @@ void textureDemo::drawTexture()
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(m_modelRotate[0] + oriRotate[0] + curTimeAngle), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(m_modelRotate[1] + oriRotate[1] + curTimeAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(m_modelRotate[2] + oriRotate[2] + curTimeAngle), glm::vec3(0.0f, 0.0f, 1.0f));
-		m_program->setUniformMatrix4F("modelMatrix", modelMatrix);
+		m_program->setUniformMatrix4f("modelMatrix", modelMatrix);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 }
 
-void textureDemo::drawImGui()
+void Example1::drawImGui()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -309,7 +315,7 @@ void textureDemo::drawImGui()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void textureDemo::processEvent()
+void Example1::processEvent()
 {
 	float deltaTime = glfwGetTime() - m_lastTime;
 	if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -334,7 +340,7 @@ void textureDemo::processEvent()
 	}
 }
 
-void textureDemo::cursorPositionCallBack(double xPosIn, double yPosIn)
+void Example1::cursorPositionCallBack(double xPosIn, double yPosIn)
 {
 	if (m_rotateState)
 	{
@@ -352,7 +358,7 @@ void textureDemo::cursorPositionCallBack(double xPosIn, double yPosIn)
 	}
 }
 
-void textureDemo::mouseButtonCallBack(int button, int action, int modifies)
+void Example1::mouseButtonCallBack(int button, int action, int modifies)
 {
 	if (button == GLFW_MOUSE_BUTTON_1)
 	{

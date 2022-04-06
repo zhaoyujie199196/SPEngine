@@ -80,7 +80,12 @@ void Program::setUniformFloat(const std::string &uniformName, float value)
 	glUniform1f(glGetUniformLocation(m_program, uniformName.c_str()), value);
 }
 
-void Program::setUniformMatrix4F(const std::string &uniformName, const glm::mat4 &matrix)
+void Program::setUniformMatrix4f(const std::string &uniformName, const glm::mat4 &matrix)
 {
 	glUniformMatrix4fv(glGetUniformLocation(m_program, uniformName.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Program::setUniformVec3f(const std::string &uniformName, const glm::vec3 &vec)
+{
+	glUniform3fv(glGetUniformLocation(m_program, uniformName.c_str()), 1, &vec[0]);
 }
